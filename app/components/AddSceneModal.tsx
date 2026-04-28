@@ -25,21 +25,41 @@ export default function AddSceneModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedColor, setSelectedColor] = useState(PIN_COLORS[0].value);
+  // Show an inline error when the user tries to submit with no title.
+  const [titleError, setTitleError] = useState(false);
 
   // Auto-focus title when modal opens; reset form when it closes.
   useEffect(() => {
     if (open) {
-      titleRef.current?.focus();
+      // Small delay lets the DOM settle before focusing.
+      const t = setTimeout(() => titleRef.current?.focus(), 30);
+      return () => clearTimeout(t);
     } else {
       setTitle("");
       setDescription("");
       setSelectedColor(PIN_COLORS[0].value);
+      setTitleError(false);
     }
   }, [open]);
 
+  // Clear the error as soon as the user starts typing.
+  const handleTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTitle(e.target.value);
+      if (titleError) setTitleError(false);
+    },
+    [titleError]
+  );
+
   const handleSubmit = useCallback(() => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setTitleError(true);
+      titleRef.current?.focus();
+      return;
+    }
     onAdd(
-      title.trim() || "Untitled Scene",
+      trimmedTitle,
       description.trim() || "No description yet.",
       selectedColor
     );
@@ -49,6 +69,7 @@ export default function AddSceneModal({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      // Cmd/Ctrl+Enter anywhere in the modal submits.
       if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit();
     },
     [onClose, handleSubmit]
@@ -64,10 +85,16 @@ export default function AddSceneModal({
       }}
       onKeyDown={handleKeyDown}
     >
-      <div className="modal-box w-full max-w-md p-7" role="dialog" aria-modal="true" aria-label="Add new scene">
+      <div
+        className="modal-box w-full max-w-md p-7"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-heading"
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h2
+            id="modal-heading"
             style={{
               fontFamily: "'Caveat', cursive",
               fontSize: "1.6rem",
@@ -80,7 +107,12 @@ export default function AddSceneModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            style={{ color: "#a07040", fontSize: "1.3rem", lineHeight: 1, cursor: "pointer" }}
+            style={{
+              color: "#a07040",
+              fontSize: "1.3rem",
+              lineHeight: 1,
+              cursor: "pointer",
+            }}
           >
             ✕
           </button>
@@ -109,11 +141,32 @@ export default function AddSceneModal({
               className="modal-input w-full px-3 py-2 text-sm"
               placeholder="e.g. The Last Train North"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange}
+              // Enter key in title field submits the form.
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSubmit();
               }}
+              style={
+                titleError
+                  ? { borderColor: "#d97c6e", boxShadow: "0 0 0 3px rgba(217,124,110,0.2)" }
+                  : undefined
+              }
+              aria-invalid={titleError}
+              aria-describedby={titleError ? "title-error" : undefined}
             />
+            {titleError && (
+              <p
+                id="title-error"
+                style={{
+                  fontFamily: "'Lato', sans-serif",
+                  fontSize: "0.75rem",
+                  color: "#d97c6e",
+                  marginTop: 4,
+                }}
+              >
+                Please enter a scene title.
+              </p>
+            )}
           </div>
 
           {/* Description */}
@@ -138,6 +191,14 @@ export default function AddSceneModal({
               placeholder="What happens in this scene? Who's there? What changes?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              // Shift+Enter in the description textarea submits the form.
+              // Plain Enter inserts a newline (default textarea behaviour).
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
             />
           </div>
 
@@ -155,11 +216,12 @@ export default function AddSceneModal({
             >
               Pin Color
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-3" role="group" aria-label="Pin color">
               {PIN_COLORS.map((c) => (
                 <button
                   key={c.value}
-                  aria-label={`${c.label} pin`}
+                  aria-label={`${c.label} pin${selectedColor === c.value ? " (selected)" : ""}`}
+                  aria-pressed={selectedColor === c.value}
                   onClick={() => setSelectedColor(c.value)}
                   style={{
                     width: 28,
@@ -167,9 +229,12 @@ export default function AddSceneModal({
                     borderRadius: "50%",
                     background: c.value,
                     border: `2px solid ${selectedColor === c.value ? "white" : "transparent"}`,
-                    boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+                    boxShadow: selectedColor === c.value
+                      ? "0 0 0 2px #8b5e2a, 0 1px 4px rgba(0,0,0,0.3)"
+                      : "0 1px 4px rgba(0,0,0,0.3)",
                     cursor: "pointer",
                     flexShrink: 0,
+                    transition: "box-shadow 0.15s",
                   }}
                 />
               ))}
@@ -200,6 +265,19 @@ export default function AddSceneModal({
               Pin Scene
             </button>
           </div>
+
+          {/* Keyboard hint */}
+          <p
+            style={{
+              fontFamily: "'Lato', sans-serif",
+              fontSize: "0.7rem",
+              color: "#a07040",
+              textAlign: "center",
+              marginTop: 2,
+            }}
+          >
+            Enter to pin · Shift+Enter in description · Esc to cancel
+          </p>
         </div>
       </div>
     </div>

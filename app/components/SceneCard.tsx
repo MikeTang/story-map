@@ -30,8 +30,8 @@ export default function SceneCard({
   onBringToFront,
 }: SceneCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  // Store drag state in a ref so event handlers always see latest values
-  // without causing re-renders.
+  // Drag state lives in a ref so pointer event handlers always see the latest
+  // values without triggering extra re-renders.
   const drag = useRef({
     active: false,
     startX: 0,
@@ -42,8 +42,9 @@ export default function SceneCard({
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      // Don't drag when clicking the delete button
-      if ((e.target as HTMLElement).classList.contains("delete-btn")) return;
+      // Don't start a drag when the user clicks the delete button (or any
+      // child of it, e.g. the ✕ text node's parent).
+      if ((e.target as HTMLElement).closest(".delete-btn")) return;
       e.preventDefault();
       onBringToFront(card.id);
       drag.current = {
@@ -79,8 +80,8 @@ export default function SceneCard({
     []
   );
 
-  // Keep drag.current.startLeft/startTop in sync when card position changes
-  // while NOT dragging (e.g. initial placement). Only update when not dragging.
+  // Keep drag.current start coords in sync when card position changes
+  // from outside (e.g. initial placement), but only while not dragging.
   useEffect(() => {
     if (!drag.current.active) {
       drag.current.startLeft = card.x;
@@ -109,14 +110,12 @@ export default function SceneCard({
       {card.useTape ? (
         <div className="tape" />
       ) : (
-        <div
-          className="pin"
-          style={{ background: card.pinColor }}
-        />
+        <div className="pin" style={{ background: card.pinColor }} />
       )}
+      {/* Delete button — visible on card hover via CSS (.index-card:hover .delete-btn) */}
       <button
         className="delete-btn"
-        aria-label="Delete scene"
+        aria-label={`Delete scene: ${card.title}`}
         onClick={(e) => {
           e.stopPropagation();
           onDelete(card.id);
