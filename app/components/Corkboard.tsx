@@ -160,6 +160,15 @@ export default function Corkboard() {
     []
   );
 
+  const handleEdit = useCallback(
+    (id: string, field: "title" | "description", value: string) => {
+      setCards((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
+      );
+    },
+    []
+  );
+
   const sceneCount = cards.length;
 
   return (
@@ -219,6 +228,7 @@ export default function Corkboard() {
             onMove={handleMove}
             onDelete={handleDelete}
             onBringToFront={handleBringToFront}
+            onEdit={handleEdit}
           />
         ))}
       </div>

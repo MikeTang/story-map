@@ -194,3 +194,20 @@
   line-height: 28px;
   font-family: 'Lato', sans-serif;
 }
+
+/* ── Inline editing ─────────────────────────────────────────────────── */
+/* Subtle underline on editable fields when the card is hovered,
+   so the user can discover that they're clickable. */
+.index-card:hover .card-editable {
+  text-decoration: underline dotted rgba(92,62,20,0.35);
+  text-underline-offset: 3px;
+}
+
+/* Remove the underline hint while the field is actually being edited. */
+.card-editable:focus {
+  text-decoration: none;
+  cursor: text;
+  /* Warm amber underline as the edit indicator — consistent with the palette */
+  border-bottom: 1.5px solid #c8973a;
+  user-select: text;
+}
