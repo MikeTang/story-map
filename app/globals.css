@@ -1,1 +1,196 @@
 @import "tailwindcss";
+
+/* ── Corkboard background ──────────────────────────────────────────── */
+.corkboard {
+  background-color: #c8973a;
+  background-image:
+    radial-gradient(ellipse at 20% 30%, rgba(160,100,20,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 70%, rgba(100,60,10,0.2)  0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+  box-shadow: inset 0 0 80px rgba(80,40,0,0.35);
+}
+
+/* ── Index card ────────────────────────────────────────────────────── */
+.index-card {
+  font-family: 'Lato', sans-serif;
+  background: #fdf6e3;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      #d4c9a8 27px,
+      #d4c9a8 28px
+    );
+  box-shadow:
+    3px 4px 12px rgba(0,0,0,0.28),
+    1px 1px 3px  rgba(0,0,0,0.15);
+  border-radius: 2px;
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  border-top: 4px solid #e8d5a3;
+}
+
+.index-card:hover {
+  box-shadow:
+    5px 8px 20px rgba(0,0,0,0.35),
+    2px 2px 5px  rgba(0,0,0,0.18);
+  transform: rotate(var(--tilt)) scale(1.025) !important;
+  z-index: 999 !important;
+}
+
+.index-card.dragging {
+  cursor: grabbing;
+  box-shadow:
+    8px 14px 28px rgba(0,0,0,0.4),
+    3px 3px 8px rgba(0,0,0,0.2);
+  transform: rotate(var(--tilt)) scale(1.05) !important;
+  z-index: 1000 !important;
+}
+
+/* ── Pin ───────────────────────────────────────────────────────────── */
+.pin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.45), inset 0 -1px 2px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+
+.pin::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 10px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 0 0 2px 2px;
+}
+
+/* ── Tape ──────────────────────────────────────────────────────────── */
+.tape {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 20px;
+  background: rgba(255,240,180,0.6);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  z-index: 5;
+}
+
+/* ── Delete button (shown on hover) ───────────────────────────────── */
+.delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d97c6e;
+  color: white;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 20;
+  font-weight: 700;
+}
+
+.index-card:hover .delete-btn {
+  opacity: 1;
+}
+
+/* ── Top bar ───────────────────────────────────────────────────────── */
+.topbar {
+  background: rgba(90,50,10,0.88);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+/* ── Scene count ───────────────────────────────────────────────────── */
+.scene-count {
+  font-family: 'Caveat', cursive;
+  font-size: 0.85rem;
+  color: #c9a86c;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* ── Add button ────────────────────────────────────────────────────── */
+.add-btn {
+  background: #8b5e2a;
+  color: #fdf6e3;
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.add-btn:hover {
+  background: #7a5025;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.35);
+}
+
+.add-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Modal ─────────────────────────────────────────────────────────── */
+.modal-overlay {
+  background: rgba(40,20,5,0.55);
+  backdrop-filter: blur(2px);
+}
+
+.modal-box {
+  background: #fdf6e3;
+  border-radius: 3px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  border-top: 5px solid #c8973a;
+}
+
+.modal-input {
+  background: #fff9ed;
+  border: 1px solid #d4c9a8;
+  border-radius: 2px;
+  font-family: 'Lato', sans-serif;
+  color: #2c1a00;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-input:focus {
+  border-color: #c8973a;
+  box-shadow: 0 0 0 3px rgba(200,151,58,0.2);
+}
+
+/* ── Card text ─────────────────────────────────────────────────────── */
+.card-title {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #2c1a00;
+  line-height: 28px;
+  margin-bottom: 4px;
+}
+
+.card-desc {
+  font-size: 0.78rem;
+  color: #5a3e20;
+  line-height: 28px;
+  font-family: 'Lato', sans-serif;
+}
