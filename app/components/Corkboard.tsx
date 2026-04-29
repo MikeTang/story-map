@@ -187,7 +187,7 @@ export default function Corkboard() {
                 lineHeight: 1,
               }}
             >
-              Story Map
+              Story Map (Stage)
             </h1>
             <p className="scene-count">
               {sceneCount} {sceneCount === 1 ? "scene pinned" : "scenes pinned"}
